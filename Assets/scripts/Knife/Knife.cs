@@ -5,7 +5,6 @@ using FruitCutting.Slice;
 using FruitCutting.Spawner;
 using System;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 namespace FruitCutting.KnifeObjects
 {

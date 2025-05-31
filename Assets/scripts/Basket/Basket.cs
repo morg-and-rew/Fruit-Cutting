@@ -10,23 +10,14 @@ namespace FruitCutting.BasketObject
     {
         public static Basket Instance;
 
-        public event Action<Fruit> OnAddToActiveQueue;
-
         [SerializeField] private Queue<Fruit> _activeFruits = new Queue<Fruit>();
 
         private float _timeBeforeRemove = 5f; 
 
-        private void OnEnable()
+        private void Awake()
         {
             if (Instance == null)
                 Instance = this;
-
-            OnAddToActiveQueue += AddToFruitQueue;
-        }
-
-        private void OnDisable()
-        {
-            OnAddToActiveQueue -= AddToFruitQueue;
         }
 
         private void Start()
@@ -34,17 +25,12 @@ namespace FruitCutting.BasketObject
             StartCoroutine(ProcessQueue());
         }
 
-        private void AddToFruitQueue(Fruit fruit)
+        public void AddToFruitQueue(Fruit fruit)
         {
             if (fruit != null)
             {
                 _activeFruits.Enqueue(fruit);
             }
-        }
-
-        public void AddFruit(Fruit fruit)
-        {
-            OnAddToActiveQueue?.Invoke(fruit);
         }
 
         public Queue<Fruit> GetActiveFruits()

@@ -2,71 +2,74 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class KnifeAnimation : MonoBehaviour
+namespace FruitCutting.Animation
 {
-    public event Action OnChangeSpeed;
-
-    private float _baseRotationSpeed = 1000; 
-    private float _currentRotationSpeed;  
-
-    private Quaternion _targetRotationDown = Quaternion.Euler(0, 0, 0);  
-    private Quaternion _targetRotationUp = Quaternion.Euler(-90, 0, 0);  
-
-    private bool isRotatingDown = true;
-
-    private void OnEnable()
+    public class KnifeAnimation : MonoBehaviour
     {
-        OnChangeSpeed += SetRotationSpeed;
-    }
+        public event Action OnChangeSpeed;
 
-    private void OnDisable()
-    {
-        OnChangeSpeed -= SetRotationSpeed;
-    }
+        private float _baseRotationSpeed = 1000; 
+        private float _currentRotationSpeed;  
 
-    private void Start()
-    {
-        _currentRotationSpeed = _baseRotationSpeed; 
-        StartCoroutine(Rotate());
-    }
+        private Quaternion _targetRotationDown = Quaternion.Euler(0, 0, 0);  
+        private Quaternion _targetRotationUp = Quaternion.Euler(-90, 0, 0);  
 
-    private IEnumerator Rotate()
-    {
-        while (true)
+        private bool isRotatingDown = true;
+
+        private void OnEnable()
         {
-            Quaternion targetRotation = isRotatingDown ? _targetRotationDown : _targetRotationUp;
+            OnChangeSpeed += SetRotationSpeed;
+        }
 
-            while (Quaternion.Angle(transform.rotation, targetRotation) > 0.1f)
+        private void OnDisable()
+        {
+            OnChangeSpeed -= SetRotationSpeed;
+        }
+
+        private void Start()
+        {
+            _currentRotationSpeed = _baseRotationSpeed; 
+            StartCoroutine(Rotate());
+        }
+
+        private IEnumerator Rotate()
+        {
+            while (true)
             {
-                float angleToTarget = Quaternion.Angle(transform.rotation, targetRotation);
-                float progress = 1 - (angleToTarget / 90f); 
+                Quaternion targetRotation = isRotatingDown ? _targetRotationDown : _targetRotationUp;
 
-                if (!isRotatingDown)
+                while (Quaternion.Angle(transform.rotation, targetRotation) > 0.1f)
                 {
-                    _currentRotationSpeed = Mathf.Lerp(_baseRotationSpeed, 10f, progress);
-                }
-                else
-                {
-                    _currentRotationSpeed = Mathf.Lerp(10f, _baseRotationSpeed, progress);
+                    float angleToTarget = Quaternion.Angle(transform.rotation, targetRotation);
+                    float progress = 1 - (angleToTarget / 90f); 
+
+                    if (!isRotatingDown)
+                    {
+                        _currentRotationSpeed = Mathf.Lerp(_baseRotationSpeed, 10f, progress);
+                    }
+                    else
+                    {
+                        _currentRotationSpeed = Mathf.Lerp(10f, _baseRotationSpeed, progress);
+                    }
+
+                    transform.rotation = Quaternion.RotateTowards(
+                        transform.rotation,
+                        targetRotation,
+                        _currentRotationSpeed * Time.deltaTime
+                    );
+
+                    yield return null;
                 }
 
-                transform.rotation = Quaternion.RotateTowards(
-                    transform.rotation,
-                    targetRotation,
-                    _currentRotationSpeed * Time.deltaTime
-                );
+                isRotatingDown = !isRotatingDown;
 
                 yield return null;
             }
-
-            isRotatingDown = !isRotatingDown;
-
-            yield return null;
         }
-    }
 
-    public void SetRotationSpeed()
-    {
-        OnChangeSpeed?.Invoke();
+        public void SetRotationSpeed()
+        {
+            OnChangeSpeed?.Invoke();
+        }
     }
 }

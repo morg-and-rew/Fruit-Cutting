@@ -56,7 +56,7 @@ namespace FruitCutting.Slice
 
             fruit.Initialize(target.CrossSelectionMaterial, target.Price);
 
-            Basket.Instance.AddFruit(fruit);
+            Basket.Instance.AddToFruitQueue(fruit);
 
             collider.convex = true;
             rigidbody.useGravity = true;

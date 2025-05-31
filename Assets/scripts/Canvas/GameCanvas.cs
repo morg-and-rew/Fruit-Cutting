@@ -1,3 +1,5 @@
+
+using FruitCutting.Spawner;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -5,21 +7,21 @@ namespace FruitCutting.Canvas.Game
 {
     public class GameCanvas : MonoBehaviour
     {
-        [SerializeField] private Button _startButton; // Поле для кнопки
+        [SerializeField] private Button _knifeButtonSpawner;
 
         private void OnEnable()
         {
-            if (_startButton != null)
+            if (_knifeButtonSpawner != null)
             {
-                _startButton.onClick.AddListener(OnStartButtonClicked); // Подписываемся на событие нажатия кнопки
+                _knifeButtonSpawner.onClick.AddListener(KnifeSpawner.Instance.SpawnKnife);
             }
         }
 
         private void OnDisable()
         {
-            if (_startButton != null)
+            if (_knifeButtonSpawner != null)
             {
-                _startButton.onClick.RemoveListener(OnStartButtonClicked); // Отписываемся от события
+                _knifeButtonSpawner.onClick.RemoveListener(KnifeSpawner.Instance.SpawnKnife); 
             }
         }
     }

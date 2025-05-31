@@ -58,7 +58,7 @@ namespace FruitCutting.Spawner
         public void Get(Fruit fruit)
         {
             fruit.Initialize(_spawnPoint, () => _objectsPool.Add(fruit));
-            Basket.Instance.AddFruit(fruit);
+            Basket.Instance.AddToFruitQueue(fruit);
         }
 
         private Fruit Create()
