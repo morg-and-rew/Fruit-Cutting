@@ -7,15 +7,15 @@ namespace FruitCutting.Fruits
 {
     public class Fruit : MonoBehaviour
     {
-        [SerializeField] private DragonFruitParamets _dragonFruitParamets;
+        [SerializeField] private FruitParamets _dragonFruitParamets;
 
         private MovementAction _movementAction = new MovementAction();
         private Coroutine _timeEventCoroutine;
 
-        private float _speed = 2f;
+        private float _speed = 1f;
 
         public Material CrossSelectionMaterial { get; private set; }
-        public float Price {  get; private set; }
+        public float Price { get; private set; }
 
         public void Initialize(Vector3 position, Action die)
         {

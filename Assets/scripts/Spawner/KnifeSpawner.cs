@@ -1,6 +1,6 @@
-using FruitCutting.Fruits;
+using FruitCutting.Animation;
+using FruitCutting.Cuonters;
 using FruitCutting.KnifeObjects;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,7 +14,14 @@ namespace FruitCutting.Spawner
         [SerializeField] private Vector3[] _spawnPoints;
 
         private Queue<Vector3> _spawnPointQueue;
-        private int _currentLevel = 1; // Текущий уровень
+
+        private int _baseCosts = 1;
+        private int _maxCosts = 20;
+        private int _maxLevel = 3;
+
+        public float СurrentCosts { get; private set; }
+
+        public int Level { get; private set; } = 1;
 
         private void Awake()
         {
@@ -22,51 +29,59 @@ namespace FruitCutting.Spawner
                 Instance = this;
             else
                 Destroy(gameObject);
-
-            InitializeSpawnPoints();
-        }
-
-        private void InitializeSpawnPoints()
-        {
-            // Инициализация очереди точек спавна
-            _spawnPointQueue = new Queue<Vector3>(_spawnPoints);
         }
 
         public void Initialize()
         {
-            SpawnKnife();
-        }
+            UpdateCurrentCots();
 
-        public void SetLevel(int level)
-        {
-            _currentLevel = level;
-            Debug.Log($"Current level set to: {_currentLevel}");
+            _spawnPointQueue = new Queue<Vector3>(_spawnPoints);
+
+            SpawnKnife();
         }
 
         public void SpawnKnife()
         {
             if (_spawnPointQueue.Count == 0)
             {
-                Debug.LogWarning("No spawn points available!");
                 return;
             }
 
             if (_availableKnives.Count == 0)
             {
-                Debug.LogWarning("No knives available to spawn!");
                 return;
             }
 
-            // Получаем индекс ножа на основе текущего уровня
-            int knifeIndex = Mathf.Clamp(_currentLevel - 1, 0, _availableKnives.Count - 1);
+            int knifeIndex = Mathf.Clamp(Level - 1, 0, _availableKnives.Count - 1);
 
             Vector3 spawnPosition = _spawnPointQueue.Dequeue();
 
-            // Берем нож, соответствующий текущему уровню
             Knife knifeToSpawn = _availableKnives[knifeIndex];
 
-            // Создаем экземпляр ножа в указанной точке
-            Knife spawnedKnife = Instantiate(knifeToSpawn, spawnPosition, Quaternion.identity);
+            Knife spawnedKnife = Instantiate(knifeToSpawn, spawnPosition, knifeToSpawn.transform.rotation);
+
+            KnifeAnimation.Instance.AddKnifeToQueue(spawnedKnife);
+        }
+
+        public void AddKnife()
+        {
+            if (Level < _maxLevel && Level > 0 && Counter.Instance.CountMoney >= СurrentCosts)
+            {
+                Level++;
+                Counter.Instance.SpendMoney(СurrentCosts);
+                UpdateCurrentCots();
+                SpawnKnife();
+            }
+        }
+
+        private void UpdateCurrentCots()
+        {
+            СurrentCosts = GetCurrentCosts();
+        }
+
+        private float GetCurrentCosts()
+        {
+            return _baseCosts + ((_maxCosts - _baseCosts) * (Level - 1)) / (_maxLevel - 1);
         }
     }
 }

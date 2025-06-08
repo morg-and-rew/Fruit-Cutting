@@ -1,75 +1,156 @@
-using System;
+using FruitCutting.Cuonters;
+using FruitCutting.KnifeObjects;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace FruitCutting.Animation
 {
     public class KnifeAnimation : MonoBehaviour
     {
-        public event Action OnChangeSpeed;
+        public static KnifeAnimation Instance;
 
-        private float _baseRotationSpeed = 1000; 
-        private float _currentRotationSpeed;  
+        private List<Knife> _knives = new List<Knife>(); 
 
-        private Quaternion _targetRotationDown = Quaternion.Euler(0, 0, 0);  
-        private Quaternion _targetRotationUp = Quaternion.Euler(-90, 0, 0);  
+        private int _baseRotationSpeed = 1000;
+        private int _maxRotationSpeed = 5000;
+        private float _currentRotationSpeed;
 
-        private bool isRotatingDown = true;
+        private int _baseCosts = 1;
+        private int _maxCosts = 20;
+        private int _maxLevel = 20;
+        public float CurrentCosts { get; private set; }
 
-        private void OnEnable()
+        public int Level { get; private set; } = 1;
+
+        private void Awake()
         {
-            OnChangeSpeed += SetRotationSpeed;
-        }
-
-        private void OnDisable()
-        {
-            OnChangeSpeed -= SetRotationSpeed;
+            if (Instance == null)
+                Instance = this;
+            else
+                Destroy(gameObject);
         }
 
         private void Start()
         {
-            _currentRotationSpeed = _baseRotationSpeed; 
-            StartCoroutine(Rotate());
+            UpdateCurrentSpeed();
+            UpdateCurrentCots();
         }
 
-        private IEnumerator Rotate()
+        public void AddKnifeToQueue(Knife knife)
         {
+            _knives.Add(knife); 
+            StartCoroutine(RotateKnife(knife, _knives.Count - 1)); 
+        }
+
+        private IEnumerator RotateKnife(Knife knife, int index)
+        {
+            Quaternion targetRotationDown = Quaternion.Euler(0, 0, 0); 
+            Quaternion targetRotationUp = Quaternion.Euler(-90, 0, 0); 
+
+            bool isRotatingDown = true;
+
             while (true)
             {
-                Quaternion targetRotation = isRotatingDown ? _targetRotationDown : _targetRotationUp;
+                Quaternion targetRotation = isRotatingDown ? targetRotationDown : targetRotationUp;
 
-                while (Quaternion.Angle(transform.rotation, targetRotation) > 0.1f)
+                if (isRotatingDown)
                 {
-                    float angleToTarget = Quaternion.Angle(transform.rotation, targetRotation);
-                    float progress = 1 - (angleToTarget / 90f); 
+                    yield return StartCoroutine(SmallAmplitudeMovement(knife, index));
+                }
 
-                    if (!isRotatingDown)
+                while (Quaternion.Angle(knife.transform.rotation, targetRotation) > 0.1f)
+                {
+                    float angleToTarget = Quaternion.Angle(knife.transform.rotation, targetRotation);
+                    float progress = 1 - (angleToTarget / 90f);
+
+                    float sharpnessDistance = 10f; 
+                    float speed = GetCurrentSpeed();
+
+                    if (angleToTarget <= sharpnessDistance)
                     {
-                        _currentRotationSpeed = Mathf.Lerp(_baseRotationSpeed, 10f, progress);
+                        speed = _maxRotationSpeed; 
                     }
                     else
                     {
-                        _currentRotationSpeed = Mathf.Lerp(10f, _baseRotationSpeed, progress);
+                        speed = Mathf.Lerp(10f, GetCurrentSpeed(), progress); 
                     }
 
-                    transform.rotation = Quaternion.RotateTowards(
-                        transform.rotation,
+                    knife.transform.rotation = Quaternion.RotateTowards(
+                        knife.transform.rotation,
                         targetRotation,
-                        _currentRotationSpeed * Time.deltaTime
+                        speed * Time.deltaTime
                     );
 
                     yield return null;
                 }
 
                 isRotatingDown = !isRotatingDown;
-
-                yield return null;
             }
         }
 
-        public void SetRotationSpeed()
+        private IEnumerator SmallAmplitudeMovement(Knife knife, int index)
         {
-            OnChangeSpeed?.Invoke();
+            float baseDuration = 1f;
+
+            float frequency = 5f;
+            float amplitude = 5f; 
+
+            float timer = 0f;
+            Quaternion initialRotation = knife.transform.rotation;
+
+            if (index > 0)
+            {
+                Knife previousKnife = _knives[index - 1];
+                Quaternion previousTargetRotation = Quaternion.Euler(0, 0, 0);
+
+                while (Quaternion.Angle(previousKnife.transform.rotation, previousTargetRotation) > 20f)
+                {
+                    yield return null;
+                }
+            }
+
+            while (timer < baseDuration)
+            {
+                float oscillation = Mathf.Sin(timer * frequency) * amplitude;
+                knife.transform.rotation = initialRotation * Quaternion.Euler(oscillation, 0, 0);
+
+                timer += Time.deltaTime;
+                yield return null;
+            }
+
+            knife.transform.rotation = initialRotation;
+        }
+
+        public void AddSpeed()
+        {
+            if (Level < _maxLevel && Level > 0 && Counter.Instance.CountMoney >= CurrentCosts)
+            {
+                Level++;
+                Counter.Instance.SpendMoney(CurrentCosts);
+                UpdateCurrentSpeed();
+                UpdateCurrentCots();
+            }
+        }
+
+        private void UpdateCurrentSpeed()
+        {
+            _currentRotationSpeed = GetCurrentSpeed();
+        }
+
+        private void UpdateCurrentCots()
+        {
+            CurrentCosts = GetCurrentCosts();
+        }
+
+        private float GetCurrentSpeed()
+        {
+            return _baseRotationSpeed + ((_maxRotationSpeed - _baseRotationSpeed) * (Level - 1)) / (_maxLevel - 1);
+        }
+
+        private float GetCurrentCosts()
+        {
+            return _baseCosts + ((_maxCosts - _baseCosts) * (Level - 1)) / (_maxLevel - 1);
         }
     }
 }

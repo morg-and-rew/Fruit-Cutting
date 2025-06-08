@@ -8,7 +8,7 @@ namespace FruitCutting.Game
         [SerializeField] private FruitSpawner _fruitSpawner;
         [SerializeField] private KnifeSpawner _knifeSpawner;
 
-        private void Start()
+        private void Awake()
         {
             _fruitSpawner.Initialize();
             _knifeSpawner.Initialize();

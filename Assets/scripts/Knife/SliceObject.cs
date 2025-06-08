@@ -9,8 +9,8 @@ namespace FruitCutting.Slice
     public class SliceObject : MonoBehaviour
     {
         [SerializeField] private Transform _planeDebug;
-        private float _upwardForce = 1f; 
-        private float _scatterForce = 1f;
+        private float _upwardForce = 3f; 
+        private float _scatterForce = 3f;
 
         public void Slice(Fruit target, Material crossSelectionMaterial)
         {
@@ -71,7 +71,7 @@ namespace FruitCutting.Slice
             {
                 scatterDirection = new Vector3(
                     GetNonZeroRandom(-2f, 2f), 
-                    GetNonZeroRandom(0.5f, 2f),
+                    GetNonZeroRandom(1f, 2f),
                     GetNonZeroRandom(-2f, 2f) 
                 );
             } while (scatterDirection == Vector3.zero);

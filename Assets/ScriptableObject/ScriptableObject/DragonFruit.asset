@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: DragonFruit
   m_EditorClassIdentifier: 
   fruitSliceMaterial: {fileID: 2100000, guid: bc6c424152f206149a59048658eca035, type: 2}
-  price: 1
+  price: 3

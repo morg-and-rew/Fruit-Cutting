@@ -11,11 +11,10 @@ namespace FruitCutting.Cuonters
         public static Counter Instance;
 
         [SerializeField] private TextMeshProUGUI _textCountMoney;
-        private float _initialMoney = 0f;
 
-        private float _countMoney;
+        private float _initialMoney = 100f;
 
-        public event Action<float> OnCountMoneyChanged;
+        public float CountMoney { get; private set; }
 
         private void Awake()
         {
@@ -27,51 +26,33 @@ namespace FruitCutting.Cuonters
 
         private void Start()
         {
-            _countMoney = _initialMoney;
+            CountMoney = _initialMoney;
             UpdateMoneyText();
-        }
-
-        private void OnEnable()
-        {
-            OnCountMoneyChanged += HandleMoneyChange;
-        }
-
-        private void OnDisable()
-        {
-            OnCountMoneyChanged -= HandleMoneyChange;
         }
 
         public void AddMoney(float amount)
         {
             if (amount > 0)
             {
-                _countMoney += amount;
-                OnCountMoneyChanged?.Invoke(_countMoney);
+                CountMoney += amount;
+                UpdateMoneyText();
             }
         }
 
-        public bool SpendMoney(float amount)
+        public void SpendMoney(float amount)
         {
-            if (amount > 0 && _countMoney >= amount)
+            if (amount > 0 && CountMoney >= amount)
             {
-                _countMoney -= amount;
-                OnCountMoneyChanged?.Invoke(_countMoney);
-                return true;
+                CountMoney -= amount;
+                UpdateMoneyText();
             }
-
-            return false;
-        }
-
-        private void HandleMoneyChange(float newAmount)
-        {
-            UpdateMoneyText();
         }
 
         private void UpdateMoneyText()
         {
             if (_textCountMoney != null)
             {
-                _textCountMoney.text = $"{_countMoney}";
+                _textCountMoney.text = $"{CountMoney}";
             }
         }
     }
